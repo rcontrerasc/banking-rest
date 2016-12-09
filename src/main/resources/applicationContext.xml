@@ -1,0 +1,61 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.3.xsd"
+	profile="main">
+
+	<import resource="applicationContext-hibernate.xml"/>
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>database.properties</value>
+		</property>
+	</bean>
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<bean id="transferDomainService"
+		class="com.unmsm.ddd.banking.domain.services.TransferDomainService"></bean>
+
+	<bean id="customerAssembler"
+		class="com.unmsm.ddd.banking.application.assemblers.CustomerAssembler">
+		<property name="bankAccountAssembler" ref="bankAccountAssembler"></property>
+	</bean>
+
+	<bean id="bankAccountAssembler"
+		class="com.unmsm.ddd.banking.application.assemblers.BankAccountAssembler">
+		<property name="customerAssembler" ref="customerAssembler"></property>
+	</bean>
+	
+	<bean id="unitOfWork"
+		class="com.unmsm.ddd.banking.infrastructure.repository.hibernate.UnitOfWorkHibernate">
+		<constructor-arg ref="sessionFactory" />
+		<property name="customerRepository" ref="customerRepository"></property>
+		<property name="bankAccountRepository" ref="bankAccountRepository"></property>
+	</bean>
+	
+	<bean id="customerRepository"
+		class="com.unmsm.ddd.banking.infrastructure.repository.hibernate.CustomerHibernateRepository">
+		<constructor-arg ref="unitOfWork"/>
+	</bean>
+	
+	<bean id="bankAccountRepository"
+		class="com.unmsm.ddd.banking.infrastructure.repository.hibernate.BankAccountHibernateRepository">
+		<constructor-arg ref="unitOfWork"/>
+	</bean>		
+
+	<bean id="bankingApplicationService"
+		class="com.unmsm.ddd.banking.application.BankingApplicationService">
+		<constructor-arg ref="unitOfWork" />
+		<constructor-arg ref="transferDomainService" />
+	</bean>
+
+</beans>
