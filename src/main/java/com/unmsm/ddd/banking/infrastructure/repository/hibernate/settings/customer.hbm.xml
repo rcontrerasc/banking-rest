@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.unmsm.ddd.banking.domain.entities">
+    <class name="Customer" table="customer">
+        <id name="id" column="customer_id">
+            <generator class="native"/>
+        </id>
+        <property name="firstName" column="first_name"/>
+        <property name="lastName" column="last_name"/>
+        <property name="isEnabled" column="enabled"/>
+ 
+        <set name="bankAccounts" inverse="true" cascade="all">
+            <key column="customer_id" not-null="true"/>
+            <one-to-many class="BankAccount"/>
+        </set>
+    </class> 
+</hibernate-mapping>
